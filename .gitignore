@@ -1,0 +1,19 @@
+# SSL Keys
+*.key
+*.crt
+*.pem
+
+# Go Binary
+*.exe
+*.test
+*.out
+main
+app
+
+# Env
+.env
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
