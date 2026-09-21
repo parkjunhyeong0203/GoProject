@@ -1,13 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Star, CheckCircle2, Circle, Clock, Tag, Edit3, Trash2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Circle, Calendar, Edit3, Trash2, AlertCircle } from 'lucide-react';
 import { Todo, Priority, Category } from '../lib/types';
 
 interface TodoCardProps {
   todo: Todo;
   onToggleComplete: (id: string) => void;
-  onToggleStar: (id: string) => void;
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
 }
@@ -40,7 +39,6 @@ const getCategoryLabel = (category: Category) => {
 export const TodoCard: React.FC<TodoCardProps> = ({
   todo,
   onToggleComplete,
-  onToggleStar,
   onEdit,
   onDelete,
 }) => {
@@ -64,7 +62,7 @@ export const TodoCard: React.FC<TodoCardProps> = ({
         gap: '12px',
       }}
     >
-      {/* Top Row: Checkbox, Title, Star */}
+      {/* Top Row: Checkbox, Title */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
           <button
@@ -109,20 +107,6 @@ export const TodoCard: React.FC<TodoCardProps> = ({
             )}
           </div>
         </div>
-
-        {/* Star Button */}
-        <button
-          onClick={() => onToggleStar(todo.id)}
-          className="btn-icon"
-          title={todo.starred ? '중요 해제' : '중요 표시'}
-          style={{ padding: '4px' }}
-        >
-          <Star
-            size={20}
-            fill={todo.starred ? 'var(--accent-amber)' : 'none'}
-            color={todo.starred ? 'var(--accent-amber)' : 'var(--text-muted)'}
-          />
-        </button>
       </div>
 
       {/* Middle Meta Info: Priority, Category, Due Date, Overdue Notice */}
@@ -153,7 +137,7 @@ export const TodoCard: React.FC<TodoCardProps> = ({
           {getCategoryLabel(todo.category)}
         </span>
 
-        {/* Due Date & Time */}
+        {/* Due Date */}
         {todo.dueDate && (
           <span
             style={{
@@ -164,32 +148,9 @@ export const TodoCard: React.FC<TodoCardProps> = ({
               fontWeight: isOverdue ? 600 : 400,
             }}
           >
-            {isOverdue ? <AlertCircle size={14} color="var(--accent-rose)" /> : <Clock size={14} />}
-            <span>
-              {todo.dueDate} {todo.dueTime ? `@ ${todo.dueTime}` : ''}
-            </span>
+            {isOverdue ? <AlertCircle size={14} color="var(--accent-rose)" /> : <Calendar size={14} />}
+            <span>{todo.dueDate}</span>
           </span>
-        )}
-
-        {/* Tags */}
-        {todo.tags && todo.tags.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
-            <Tag size={13} color="var(--text-muted)" />
-            {todo.tags.map((tag, i) => (
-              <span
-                key={i}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '2px 8px',
-                  borderRadius: '10px',
-                  background: 'rgba(99, 102, 241, 0.12)',
-                  color: '#a5b4fc',
-                }}
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
         )}
       </div>
 

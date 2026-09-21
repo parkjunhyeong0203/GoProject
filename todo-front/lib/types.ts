@@ -8,11 +8,8 @@ export interface Todo {
   description?: string;
   completed: boolean;
   dueDate: string; // YYYY-MM-DD
-  dueTime?: string; // HH:mm
   priority: Priority;
   category: Category;
-  starred: boolean;
-  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -41,4 +38,4 @@ export type ViewMode = 'dashboard' | 'todos' | 'calendar' | 'analytics';
 
 export type FilterPriority = 'all' | Priority;
 export type FilterCategory = 'all' | Category;
-export type FilterStatus = 'all' | 'active' | 'completed' | 'starred';
+export type FilterStatus = 'all' | 'active' | 'completed';

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, ListTodo, Flame, Star, TrendingUp } from 'lucide-react';
+import { CheckCircle2, ListTodo, Flame, TrendingUp } from 'lucide-react';
 import { Todo } from '../lib/types';
 
 interface TodoStatsProps {
@@ -11,7 +11,6 @@ interface TodoStatsProps {
 export const TodoStats: React.FC<TodoStatsProps> = ({ todos }) => {
   const total = todos.length;
   const completed = todos.filter(t => t.completed).length;
-  const starred = todos.filter(t => t.starred).length;
   const urgentOrHigh = todos.filter(t => !t.completed && (t.priority === 'urgent' || t.priority === 'high')).length;
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -80,18 +79,18 @@ export const TodoStats: React.FC<TodoStatsProps> = ({ todos }) => {
         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>긴급 및 높은 우선순위 처리</span>
       </div>
 
-      {/* Card 4: Starred Items */}
+      {/* Card 4: Completed Items */}
       <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>중요 보관함</span>
-          <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)' }}>
-            <Star size={18} color="var(--accent-amber)" />
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>완료된 항목</span>
+          <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)' }}>
+            <CheckCircle2 size={18} color="var(--accent-emerald)" />
           </div>
         </div>
         <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>
-          {starred} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>건</span>
+          {completed} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>건</span>
         </div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>즐겨찾기 핀 고정 항목</span>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>완료 처리된 할 일</span>
       </div>
     </div>
   );

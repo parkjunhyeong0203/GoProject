@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, CheckCircle2, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
 import { Todo, Priority } from '../lib/types';
 
 interface CalendarViewProps {
@@ -274,12 +274,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     >
                       {todo.title}
                     </div>
-                    {todo.dueTime && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Clock size={12} />
-                        <span>{todo.dueTime}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
                 <span

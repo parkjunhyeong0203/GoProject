@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Save, Calendar as CalendarIcon, Clock, Tag, AlertCircle } from 'lucide-react';
+import { X, Plus, Save, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
 import { Todo, Priority, Category } from '../lib/types';
 
 interface TodoModalProps {
@@ -22,10 +22,6 @@ export const TodoModal: React.FC<TodoModalProps> = ({
   const [priority, setPriority] = useState<Priority>('medium');
   const [category, setCategory] = useState<Category>('work');
   const [dueDate, setDueDate] = useState('');
-  const [dueTime, setDueTime] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [starred, setStarred] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -35,37 +31,17 @@ export const TodoModal: React.FC<TodoModalProps> = ({
       setPriority(initialData.priority);
       setCategory(initialData.category);
       setDueDate(initialData.dueDate || '');
-      setDueTime(initialData.dueTime || '');
-      setTags(initialData.tags || []);
-      setStarred(initialData.starred || false);
     } else {
       setTitle('');
       setDescription('');
       setPriority('medium');
       setCategory('work');
       setDueDate(new Date().toISOString().split('T')[0]);
-      setDueTime('18:00');
-      setTags([]);
-      setStarred(false);
     }
     setError('');
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
-
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-      }
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove));
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,9 +56,6 @@ export const TodoModal: React.FC<TodoModalProps> = ({
       priority,
       category,
       dueDate,
-      dueTime,
-      tags,
-      starred,
     });
     onClose();
   };
@@ -212,76 +185,18 @@ export const TodoModal: React.FC<TodoModalProps> = ({
             </div>
           </div>
 
-          {/* Due Date & Time */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                <CalendarIcon size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                마감 일자
-              </label>
-              <input
-                type="date"
-                className="form-input"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                <Clock size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                마감 시간
-              </label>
-              <input
-                type="time"
-                className="form-input"
-                value={dueTime}
-                onChange={e => setDueTime(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Tags */}
+          {/* Due Date */}
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-              <Tag size={14} style={{ display: 'inline', marginRight: '4px' }} />
-              태그 (Enter 키를 눌러 추가)
+              <CalendarIcon size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              마감 일자
             </label>
             <input
-              type="text"
+              type="date"
               className="form-input"
-              placeholder="태그 입력 후 Enter..."
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={handleAddTag}
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
             />
-            {tags.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                {tags.map((t, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '12px',
-                      background: 'rgba(99, 102, 241, 0.18)',
-                      color: '#a5b4fc',
-                      fontSize: '0.8rem',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    #{t}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(t)}
-                      style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', padding: 0 }}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Modal Footer */}
