@@ -46,10 +46,7 @@
             "completed": false,
             "priority": "urgent",
             "category": "study",
-            "dueDate": "2026-09-18",
-            "dueTime": "18:00",
-            "starred": true,
-            "tags": ["Go", "Gin", "JWT"]
+            "dueDate": "2026-09-18"
           }
         ]
         
@@ -60,14 +57,11 @@
           "description": "헬스장 1시간",
           "priority": "medium",
           "category": "health",
-          "dueDate": "2026-09-19",
-          "dueTime": "07:00",
-          "starred": false,
-          "tags": ["workout"]
+          "dueDate": "2026-09-19"
         }
         
       • 응답: 생성된 Todo JSON 객체
-  • PUT /todos/:id (할 일 수정 / 완료 토글 / 중요 표시)
+  • PUT /todos/:id (할 일 수정 / 완료 토글)
       • 요청: 수정할 필드가 담긴 JSON
       • 응답: 수정 완료된 Todo JSON 객체
   • DELETE /todos/:id (할 일 삭제)

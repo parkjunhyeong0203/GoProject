@@ -1,18 +1,93 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+	"todo-api/config"
+	"todo-api/internal/middleware"
+	"todo-api/internal/model"
+
+	"github.com/gin-gonic/gin"
+)
+
+type UserInfo struct {
+	UserName string `json:"user_name" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+type TodoInfo struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Priority    string `json:"priority"`
+	Category    string `json:"category"`
+	DueDate     string `json:"due_date"`
+}
 
 func SetupHandlers(g *gin.Engine) {
-	g.GET("/todos", GetTodoHandler)
-	g.POST("/todos", PostTodoHandler)
-	g.PUT("/todos/:id", PutTodoHandler)
-	g.DELETE("/todos/:id", DeleteTodoHandler)
+	// 인증이 필요 없는 공개 라우트
+	auth := g.Group("/auth")
+	{
+		auth.POST("/register", GenerateUser)
+		auth.POST("/login", LoginUser)
+	}
+
+	// JWT 미들웨어 적용 라우트 그룹
+	api := g.Group("/todos")
+	api.Use(middleware.AuthMiddleware()) // 미들웨어 적용
+	{
+		api.GET("", GetTodoHandler)
+		api.POST("", PostTodoHandler)
+		api.PUT("/:id", PutTodoHandler)
+		api.DELETE("/:id", DeleteTodoHandler)
+	}
+}
+func GenerateUser(c *gin.Context) {
+
+}
+func LoginUser(c *gin.Context) {
+
 }
 func GetTodoHandler(c *gin.Context) {
+	userIDVal, exist := c.Get("userID")
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "There is no infomation"})
+		return
+	}
+	userID := uint(userIDVal.(float64)) //DB에서 해당 유저 Todo 조회
+
+	var todos []model.TodoList
+	result := config.DB.Where("id = ?", userID).Find(&todos)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Todo access fail"})
+	}
+	c.JSON(http.StatusOK, gin.H{"count": len(todos), "data": todos})
 
 }
 func PostTodoHandler(c *gin.Context) {
-
+	userIDVal, exists := c.Get("userID")
+	req := &TodoInfo{}
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "There is no infomaiton"})
+		return
+	}
+	userID := uint(userIDVal.(float64))
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "It is not correct"})
+	}
+	todo := model.TodoList{
+		ID:          userID,
+		Title:       req.Title,
+		Description: req.Description,
+		Priority:    req.Priority,
+		Category:    req.Category,
+		DueDate:     req.DueDate,
+		Completed:   false,
+	}
+	result := config.DB.Create(&todo)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "save fail"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Todo save success", "data": todo})
 }
 func PutTodoHandler(c *gin.Context) {
 
