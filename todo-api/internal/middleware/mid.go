@@ -2,13 +2,14 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var SecretKey = []byte("this-is-my-goproj-secret-key-12345") // 실무에서는 환경변수로 관리, 아마 내가 따로 환경변수 만들어야할듯
+var SecretKey = []byte(os.Getenv("JWT_SECRET"))
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
