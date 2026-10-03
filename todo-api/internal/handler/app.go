@@ -3,11 +3,14 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"time"
 	"todo-api/config"
 	"todo-api/internal/middleware"
 	"todo-api/internal/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -44,10 +47,87 @@ func SetupHandlers(g *gin.Engine) {
 	}
 }
 func GenerateUser(c *gin.Context) {
+	req := &UserInfo{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not correct value: " + err.Error()})
+		return
+	}
+	var existUser model.User
+	err := config.DB.Where("email = ?", req.Email).First(&existUser).Error
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Used Email!"})
+		return
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB access error"})
+		return
+	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "crypt fail"})
+		return
+	}
 
+	user := model.User{
+		UserName: req.UserName,
+		Email:    req.Email,
+		Password: string(hashedPassword),
+	}
+
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "join in fail"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"mesaage": "join in success",
+		"user": gin.H{
+			"id":        user.ID,
+			"User_name": user.UserName,
+			"email":     user.Email,
+		},
+	})
 }
 func LoginUser(c *gin.Context) {
+	var req struct {
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not correct Email or Password"})
+		return
+	}
 
+	var user model.User
+	if err := config.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) { //이메일 틀렸을때
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Email od Password"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB access error"})
+		return
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil { // 비번 틀렸을때
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Email or Password"})
+		return
+	}
+	//jwt 토큰 생성
+	claims := jwt.MapClaims{
+		"userID": user.ID,
+		"email":  user.Email,
+		"exp":    time.Now().Add(time.Hour * 24).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(middleware.SecretKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to generate token"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login success",
+		"token":   tokenString,
+	})
 }
 func GetTodoHandler(c *gin.Context) {
 	userIDVal, exist := c.Get("userID")
