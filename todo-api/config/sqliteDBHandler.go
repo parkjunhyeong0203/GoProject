@@ -20,8 +20,8 @@ func InitDB() {
 	}
 
 	// Struct 정의를 바탕으로 DB 테이블 자동 생성/업데이트
-	err = DB.AutoMigrate(&model.TodoList{})
+	err = DB.AutoMigrate(&model.TodoList{}, &model.User{})
 	if err != nil {
-		log.Fatal("테이블 마이그레이션 실패:", err)
+		log.Fatal("Table migration fail :", err)
 	}
 }
