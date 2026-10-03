@@ -12,3 +12,10 @@ type TodoList struct {
 	Category    string `json:"category"`
 	DueDate     string `json:"due_date"`
 }
+
+type User struct {
+	gorm.Model
+	UserName string `json:"user_name" gorm:"not null"`
+	Email    string `json:"email" gorm:"unique;not null"`
+	Password string `json:"-" gorm:"not null"`
+}
