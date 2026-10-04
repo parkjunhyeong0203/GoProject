@@ -15,7 +15,7 @@ import (
 )
 
 type UserInfo struct {
-	UserName string `json:"user_name" binding:"required"`
+	UserName string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
@@ -25,7 +25,7 @@ type TodoInfo struct {
 	Priority    string `json:"priority"`
 	Completed   *bool  `json:"completed"`
 	Category    string `json:"category"`
-	DueDate     string `json:"due_date"`
+	DueDate     string `json:"dueDate"`
 }
 
 func SetupHandlers(g *gin.Engine) {
@@ -77,30 +77,42 @@ func GenerateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "join in fail"})
 		return
 	}
+	claims := jwt.MapClaims{
+		"userID": user.ID,
+		"email":  user.Email,
+		"exp":    time.Now().Add(time.Hour * 24).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(middleware.SecretKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to generate token"})
+		return
+	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"mesaage": "join in success",
+		"message": "join in success",
+		"token":   tokenString,
 		"user": gin.H{
-			"id":        user.ID,
-			"User_name": user.UserName,
-			"email":     user.Email,
+			"id":       user.ID,
+			"username": user.UserName,
+			"email":    user.Email,
 		},
 	})
 }
 func LoginUser(c *gin.Context) {
 	var req struct {
-		Email    string `json:"email" binding:"required,email"`
+		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Not correct Email or Password"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not correct Username or Password"})
 		return
 	}
 
 	var user model.User
-	if err := config.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
+	if err := config.DB.Where("user_name", req.Username).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) { //이메일 틀렸을때
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Email od Password"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Username or Password"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB access error"})
@@ -109,7 +121,7 @@ func LoginUser(c *gin.Context) {
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil { // 비번 틀렸을때
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Email or Password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Username or Password"})
 		return
 	}
 	//jwt 토큰 생성
@@ -127,20 +139,26 @@ func LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login success",
 		"token":   tokenString,
+		"user": gin.H{
+			"id":       user.ID,
+			"username": user.UserName,
+			"email":    user.Email,
+		},
 	})
 }
 func GetTodoHandler(c *gin.Context) {
 	userIDVal, exist := c.Get("userID")
 	if !exist {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "There is no infomation"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "There is no information"})
 		return
 	}
 	userID := uint(userIDVal.(float64)) //DB에서 해당 유저 Todo 조회
 
 	var todos []model.TodoList
-	result := config.DB.Where("id = ?", userID).Find(&todos)
+	result := config.DB.Where("user_id = ?", userID).Find(&todos)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Todo access fail"})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"count": len(todos), "data": todos})
 
@@ -155,9 +173,10 @@ func PostTodoHandler(c *gin.Context) {
 	userID := uint(userIDVal.(float64))
 	if err := c.ShouldBindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "It is not correct"})
+		return
 	}
 	todo := model.TodoList{
-		ID:          userID,
+		UserID:      userID,
 		Title:       req.Title,
 		Description: req.Description,
 		Priority:    req.Priority,
