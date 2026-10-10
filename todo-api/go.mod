@@ -5,7 +5,6 @@ go 1.26.3
 require (
 	github.com/gin-contrib/cors v1.7.9
 	github.com/gin-gonic/gin v1.12.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	golang.org/x/crypto v0.56.0
 	gorm.io/driver/sqlite v1.6.0
