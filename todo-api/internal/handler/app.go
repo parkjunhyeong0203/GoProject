@@ -53,9 +53,9 @@ func GenerateUser(c *gin.Context) {
 		return
 	}
 	var existUser model.User
-	err := config.DB.Where("email = ?", req.Email).First(&existUser).Error
+	err := config.DB.Where("user_name = ? OR email = ?", req.UserName, req.Email).First(&existUser).Error
 	if err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Used Email!"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Used name OR Used Email!"})
 		return
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB access error"})
@@ -111,7 +111,7 @@ func LoginUser(c *gin.Context) {
 
 	var user model.User
 	if err := config.DB.Where("user_name", req.Username).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) { //이메일 틀렸을때
+		if errors.Is(err, gorm.ErrRecordNotFound) { //유저네임 틀렸을때
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Not correct Username or Password"})
 			return
 		}

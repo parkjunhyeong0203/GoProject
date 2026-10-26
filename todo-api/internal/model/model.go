@@ -3,8 +3,8 @@ package model
 import "gorm.io/gorm"
 
 type TodoList struct {
+	UserID uint `json:"id" gorm:"primarykey"`
 	gorm.Model
-	UserID      uint   `json:"id" gorm:"not null"`
 	Title       string `json:"title" gorm:"not null"`
 	Description string `json:"description"`
 	Completed   bool   `json:"completed" gorm:"default:false"`
@@ -15,7 +15,7 @@ type TodoList struct {
 
 type User struct {
 	gorm.Model
-	UserName string `json:"user_name" gorm:"not null"`
+	UserName string `json:"user_name" gorm:"unique;not null"`
 	Email    string `json:"email" gorm:"unique;not null"`
 	Password string `json:"-" gorm:"not null"`
 }
