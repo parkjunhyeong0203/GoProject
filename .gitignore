@@ -17,3 +17,6 @@ main
 .DS_Store
 .vscode/
 .idea/
+
+# Database
+.db
