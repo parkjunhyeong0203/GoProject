@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Save } from 'lucide-react';
+import { X, Server, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { ApiConfig } from '../lib/types';
 import { apiService } from '../lib/api';
 
@@ -55,71 +55,86 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '16px',
+      }}
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="glass-panel animate-fade-in"
+        className="animate-fade-in"
         style={{
           width: '100%',
-          maxWidth: '520px',
-          padding: '28px',
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border-glow)',
-          boxShadow: 'var(--shadow-lg)',
+          maxWidth: '480px',
+          backgroundColor: 'var(--bg-surface)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-modal)',
+          border: '1px solid var(--border-default)',
+          overflow: 'hidden',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Server size={22} color="var(--accent-primary)" />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-              Go 백엔드 REST API 연동 설정
+        {/* Header */}
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--border-default)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Server size={18} style={{ color: 'var(--primary)' }} />
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              백엔드 API 연결 설정
             </h2>
           </div>
           <button onClick={onClose} className="btn-icon">
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
 
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSave} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Mode Switch Card */}
           <div
             style={{
-              padding: '14px',
-              borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid var(--border-color)',
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--bg-subtle)',
+              border: '1px solid var(--border-subtle)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
             }}
           >
             <div>
-              <div style={{ fontWeight: 600, fontSize: '0.92rem' }}>통신 모드 선택</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                {useMock ? 'Mock API 모드 (백엔드 없이 프론트 단독 동작)' : 'Live Go Backend API 직접 통신 모드'}
+              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                {useMock ? 'Mock API 모드 활성' : 'Live Go Backend API 연동'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                {useMock ? '서버 없이 브라우저 로컬 데이터로 동작합니다' : '실제 Go REST API 서버와 직접 통신합니다'}
               </div>
             </div>
-            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '6px' }}>
               <input
                 type="checkbox"
                 checked={!useMock}
                 onChange={e => setUseMock(!e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
               />
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Real API</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>Live 연동</span>
             </label>
           </div>
 
-          {/* Base URL Input */}
+          {/* Base URL */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.83rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-              Go 백엔드 서버 URL (Base URL)
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+              서버 호스트 URL
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
@@ -134,80 +149,87 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
                 onClick={handleTestConnection}
                 className="btn-secondary"
                 disabled={testingPing}
-                style={{ whiteSpace: 'nowrap', padding: '0 14px' }}
+                style={{ whiteSpace: 'nowrap', padding: '0 12px', fontSize: '0.8rem' }}
               >
-                <RefreshCw size={15} className={testingPing ? 'animate-spin' : ''} />
-                <span>연결 테스트</span>
+                <RefreshCw size={13} className={testingPing ? 'animate-spin' : ''} />
+                <span>테스트</span>
               </button>
             </div>
+
             {pingStatus === 'success' && (
-              <div style={{ color: 'var(--accent-emerald)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
-                <CheckCircle2 size={14} />
-                <span>백엔드 서버에 성공적으로 연결되었습니다!</span>
+              <div style={{ color: 'var(--accent-success)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
+                <CheckCircle2 size={13} />
+                <span>백엔드 서버와 통신할 수 있습니다.</span>
               </div>
             )}
             {pingStatus === 'failed' && (
-              <div style={{ color: 'var(--accent-rose)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
-                <AlertCircle size={14} />
-                <span>서버 응답 없음. 백엔드(http://localhost:8080)가 켜져 있는지 확인하세요.</span>
+              <div style={{ color: 'var(--accent-danger)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
+                <AlertCircle size={13} />
+                <span>서버에 연결할 수 없습니다. 포트(8080)와 실행 여부를 확인하세요.</span>
               </div>
             )}
           </div>
 
-          {/* Endpoint Customization */}
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '14px', marginTop: '4px' }}>
-            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px' }}>
-              API 엔드포인트 경로 매핑
-            </h4>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Endpoints */}
+          <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
+            <span style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+              엔드포인트 경로
+            </span>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div>
-                <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>할 일 REST API (Todos Endpoint)</label>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>할 일 엔드포인트</span>
                 <input
                   type="text"
                   className="form-input"
                   value={todosEndpoint}
                   onChange={e => setTodosEndpoint(e.target.value)}
-                  placeholder="/todos 또는 /students"
-                  style={{ marginTop: '2px', padding: '8px 12px' }}
+                  style={{ marginTop: '2px', padding: '6px 10px', fontSize: '0.825rem' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>로그인 Endpoint</label>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>로그인</span>
                   <input
                     type="text"
                     className="form-input"
                     value={authLoginEndpoint}
                     onChange={e => setAuthLoginEndpoint(e.target.value)}
-                    placeholder="/auth/login"
-                    style={{ marginTop: '2px', padding: '8px 12px' }}
+                    style={{ marginTop: '2px', padding: '6px 10px', fontSize: '0.825rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>회원가입 Endpoint</label>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>회원가입</span>
                   <input
                     type="text"
                     className="form-input"
                     value={authRegisterEndpoint}
                     onChange={e => setAuthRegisterEndpoint(e.target.value)}
-                    placeholder="/auth/register"
-                    style={{ marginTop: '2px', padding: '8px 12px' }}
+                    style={{ marginTop: '2px', padding: '6px 10px', fontSize: '0.825rem' }}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Save Footer */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+          {/* Footer */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '8px',
+              paddingTop: '12px',
+              borderTop: '1px solid var(--border-subtle)',
+              marginTop: '4px',
+            }}
+          >
             <button type="button" onClick={onClose} className="btn-secondary">
               취소
             </button>
             <button type="submit" className="btn-primary">
-              <Save size={16} />
-              <span>설정 저장</span>
+              설정 저장
             </button>
           </div>
         </form>

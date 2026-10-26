@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, ListTodo, Flame, TrendingUp } from 'lucide-react';
+import { CheckCircle2, Calendar, AlertTriangle, Layers } from 'lucide-react';
 import { Todo } from '../lib/types';
 
 interface TodoStatsProps {
@@ -22,75 +22,99 @@ export const TodoStats: React.FC<TodoStatsProps> = ({ todos }) => {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '16px',
+        gap: '12px',
         marginBottom: '24px',
       }}
     >
-      {/* Card 1: Completion Progress */}
-      <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Metric 1: Overall Completion */}
+      <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>전체 달성률</span>
-          <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)' }}>
-            <TrendingUp size={18} color="var(--accent-primary)" />
-          </div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>전체 달성률</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            {completed}/{total} 완료
+          </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-          <span style={{ fontSize: '1.8rem', fontWeight: 800 }}>{completionRate}%</span>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>({completed}/{total} 완료)</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+          <span style={{ fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.5px' }}>
+            {completionRate}%
+          </span>
         </div>
-        {/* Progress Bar */}
-        <div style={{ width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+        {/* Sleek Progress Bar */}
+        <div
+          style={{
+            width: '100%',
+            height: '4px',
+            backgroundColor: 'var(--border-subtle)',
+            borderRadius: 'var(--radius-full)',
+            overflow: 'hidden',
+            marginTop: '2px',
+          }}
+        >
           <div
             style={{
               width: `${completionRate}%`,
               height: '100%',
-              background: 'var(--accent-gradient)',
-              transition: 'width 0.5s ease-in-out',
+              backgroundColor: 'var(--accent-success)',
+              borderRadius: 'var(--radius-full)',
+              transition: 'width 0.4s ease',
             }}
           />
         </div>
       </div>
 
-      {/* Card 2: Due Today */}
-      <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Metric 2: Due Today */}
+      <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>오늘의 할 일</span>
-          <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.15)' }}>
-            <ListTodo size={18} color="var(--accent-blue)" />
-          </div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>오늘 마감</span>
+          <Calendar size={15} style={{ color: 'var(--text-muted)' }} />
         </div>
-        <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>
-          {dueToday} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>건 남음</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+          <span style={{ fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.5px' }}>
+            {dueToday}
+          </span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>건</span>
         </div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>오늘 마감 예정인 일정</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>오늘 완료해야 할 항목</span>
       </div>
 
-      {/* Card 3: Urgent & High Priorities */}
-      <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Metric 3: Priority Attention */}
+      <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>우선순위 항목</span>
-          <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.15)' }}>
-            <Flame size={18} color="var(--accent-rose)" />
-          </div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>우선 처리 필요</span>
+          <AlertTriangle
+            size={15}
+            style={{ color: urgentOrHigh > 0 ? 'var(--accent-danger)' : 'var(--text-muted)' }}
+          />
         </div>
-        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: urgentOrHigh > 0 ? 'var(--accent-rose)' : 'var(--text-primary)' }}>
-          {urgentOrHigh} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>건</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+          <span
+            style={{
+              fontSize: '1.6rem',
+              fontWeight: 700,
+              letterSpacing: '-0.5px',
+              color: urgentOrHigh > 0 ? 'var(--accent-danger)' : 'inherit',
+            }}
+          >
+            {urgentOrHigh}
+          </span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>건</span>
         </div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>긴급 및 높은 우선순위 처리</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>긴급 및 높음 우선순위</span>
       </div>
 
-      {/* Card 4: Completed Items */}
-      <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Metric 4: Done Count */}
+      <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>완료된 항목</span>
-          <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)' }}>
-            <CheckCircle2 size={18} color="var(--accent-emerald)" />
-          </div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>완료된 항목</span>
+          <CheckCircle2 size={15} style={{ color: 'var(--accent-success)' }} />
         </div>
-        <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>
-          {completed} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>건</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+          <span style={{ fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.5px' }}>
+            {completed}
+          </span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>건</span>
         </div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>완료 처리된 할 일</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>해결 및 완료 완료됨</span>
       </div>
     </div>
   );

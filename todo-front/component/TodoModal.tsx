@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Save, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { X, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
 import { Todo, Priority, Category } from '../lib/types';
 
 interface TodoModalProps {
@@ -66,67 +66,78 @@ export const TodoModal: React.FC<TodoModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'rgba(0, 0, 0, 0.7)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '16px',
+      }}
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="glass-panel animate-fade-in"
+        className="animate-fade-in"
         style={{
           width: '100%',
-          maxWidth: '540px',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          padding: '28px',
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border-glow)',
-          boxShadow: 'var(--shadow-lg)',
+          maxWidth: '500px',
+          backgroundColor: 'var(--bg-surface)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-modal)',
+          border: '1px solid var(--border-default)',
+          overflow: 'hidden',
         }}
       >
-        {/* Modal Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>
-            {initialData ? '할 일 수정하기' : '새 할 일 추가'}
+        {/* Header */}
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--border-default)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+            {initialData ? '할 일 수정' : '새 할 일 만들기'}
           </h2>
           <button onClick={onClose} className="btn-icon">
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
 
         {error && (
           <div
             style={{
-              padding: '10px 14px',
-              borderRadius: '8px',
-              background: 'rgba(244, 63, 94, 0.15)',
-              border: '1px solid rgba(244, 63, 94, 0.3)',
-              color: 'var(--accent-rose)',
-              fontSize: '0.88rem',
+              margin: '16px 20px 0 20px',
+              padding: '8px 12px',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--accent-danger-subtle)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              color: 'var(--accent-danger)',
+              fontSize: '0.825rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px',
+              gap: '6px',
             }}
           >
-            <AlertCircle size={16} />
+            <AlertCircle size={14} />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Title */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px' }}>
               할 일 제목 *
             </label>
             <input
               type="text"
               className="form-input"
-              placeholder="예: Go JWT 백엔드 API 라우트 테스트"
+              placeholder="무엇을 완료해야 하나요?"
               value={title}
               onChange={e => setTitle(e.target.value)}
               autoFocus
@@ -135,60 +146,61 @@ export const TodoModal: React.FC<TodoModalProps> = ({
 
           {/* Description */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-              상세 설명
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+              상세 메모
             </label>
             <textarea
               className="form-input"
               rows={3}
-              placeholder="세부적인 내용이나 참고 사항을 입력하세요..."
+              placeholder="필요한 세부 메모나 링크를 작성하세요..."
               value={description}
               onChange={e => setDescription(e.target.value)}
-              style={{ resize: 'vertical', minHeight: '80px' }}
+              style={{ resize: 'vertical', minHeight: '70px' }}
             />
           </div>
 
-          {/* Category & Priority Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          {/* Priority & Category Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 우선순위
               </label>
               <select
                 className="form-select"
+                style={{ width: '100%' }}
                 value={priority}
                 onChange={e => setPriority(e.target.value as Priority)}
               >
-                <option value="urgent">🔥 긴급 (Urgent)</option>
-                <option value="high">⚡ 높음 (High)</option>
-                <option value="medium">🔷 보통 (Medium)</option>
-                <option value="low">🌱 낮음 (Low)</option>
+                <option value="urgent">긴급 (Urgent)</option>
+                <option value="high">높음 (High)</option>
+                <option value="medium">보통 (Medium)</option>
+                <option value="low">낮음 (Low)</option>
               </select>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 카테고리
               </label>
               <select
                 className="form-select"
+                style={{ width: '100%' }}
                 value={category}
                 onChange={e => setCategory(e.target.value as Category)}
               >
-                <option value="work">💼 업무</option>
-                <option value="personal">👤 개인</option>
-                <option value="study">📚 공부</option>
-                <option value="health">💪 건강</option>
-                <option value="finance">💰 금융</option>
-                <option value="other">📌 기타</option>
+                <option value="work">업무 (Work)</option>
+                <option value="personal">개인 (Personal)</option>
+                <option value="study">공부 (Study)</option>
+                <option value="health">건강 (Health)</option>
+                <option value="finance">금융 (Finance)</option>
+                <option value="other">기타 (Other)</option>
               </select>
             </div>
           </div>
 
           {/* Due Date */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
-              <CalendarIcon size={14} style={{ display: 'inline', marginRight: '4px' }} />
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '6px' }}>
               마감 일자
             </label>
             <input
@@ -199,14 +211,23 @@ export const TodoModal: React.FC<TodoModalProps> = ({
             />
           </div>
 
-          {/* Modal Footer */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+          {/* Actions Footer */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '8px',
+              paddingTop: '12px',
+              borderTop: '1px solid var(--border-subtle)',
+              marginTop: '4px',
+            }}
+          >
             <button type="button" onClick={onClose} className="btn-secondary">
               취소
             </button>
             <button type="submit" className="btn-primary">
-              {initialData ? <Save size={16} /> : <Plus size={16} />}
-              <span>{initialData ? '저장하기' : '생성하기'}</span>
+              {initialData ? '수정 완료' : '추가하기'}
             </button>
           </div>
         </form>

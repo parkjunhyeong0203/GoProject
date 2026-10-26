@@ -1,7 +1,18 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, CheckSquare, Calendar, Sliders, LogIn, LogOut, User, Server, Moon, Sun, Sparkles } from 'lucide-react';
+import {
+  CheckSquare,
+  LayoutDashboard,
+  Calendar,
+  Sliders,
+  LogIn,
+  LogOut,
+  Moon,
+  Sun,
+  Server,
+  Layers,
+} from 'lucide-react';
 import { ViewMode, ApiConfig, AuthState } from '../lib/types';
 
 interface NavbarProps {
@@ -28,124 +39,175 @@ export const Navbar: React.FC<NavbarProps> = ({
   toggleTheme,
 }) => {
   return (
-    <header className="glass-panel" style={{
-      position: 'sticky',
-      top: '12px',
-      zIndex: 40,
-      margin: '0 24px 24px 24px',
-      padding: '12px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
-      {/* Brand & Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <div style={{
-          width: '42px',
-          height: '42px',
-          borderRadius: '12px',
-          background: 'var(--accent-gradient)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: 'var(--shadow-glow)'
-        }}>
-          <Sparkles size={22} color="#ffffff" />
+    <header
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        backgroundColor: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border-default)',
+        padding: '0 24px',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '28px',
+      }}
+    >
+      {/* Brand & Workspace Identity */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div
+          style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: 'var(--primary)',
+            color: 'var(--text-on-accent)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--shadow-xs)',
+          }}
+        >
+          <CheckSquare size={16} strokeWidth={2.5} />
         </div>
-        <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.5px' }} className="text-gradient">
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+          <span style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
             Project TDL
-          </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            JWT REST API Todo & Calendar
-          </p>
+          </span>
+          <span
+            style={{
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              padding: '1px 6px',
+              borderRadius: 'var(--radius-xs)',
+              backgroundColor: 'var(--bg-subtle)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            v1.0
+          </span>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <nav style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '14px' }}>
+      {/* Navigation Segmented Control */}
+      <nav className="segment-group">
         <button
           onClick={() => setCurrentView('dashboard')}
-          className={currentView === 'dashboard' ? 'btn-primary' : 'btn-secondary'}
-          style={{ border: 'none', padding: '8px 16px', borderRadius: '10px', fontSize: '0.88rem' }}
+          className={`segment-item ${currentView === 'dashboard' ? 'active' : ''}`}
         >
-          <LayoutDashboard size={17} />
+          <LayoutDashboard size={14} />
           <span>대시보드</span>
         </button>
         <button
           onClick={() => setCurrentView('todos')}
-          className={currentView === 'todos' ? 'btn-primary' : 'btn-secondary'}
-          style={{ border: 'none', padding: '8px 16px', borderRadius: '10px', fontSize: '0.88rem' }}
+          className={`segment-item ${currentView === 'todos' ? 'active' : ''}`}
         >
-          <CheckSquare size={17} />
-          <span>할 일 (Todos)</span>
+          <Layers size={14} />
+          <span>목록 보기</span>
         </button>
         <button
           onClick={() => setCurrentView('calendar')}
-          className={currentView === 'calendar' ? 'btn-primary' : 'btn-secondary'}
-          style={{ border: 'none', padding: '8px 16px', borderRadius: '10px', fontSize: '0.88rem' }}
+          className={`segment-item ${currentView === 'calendar' ? 'active' : ''}`}
         >
-          <Calendar size={17} />
-          <span>캘린더 (Calendar)</span>
+          <Calendar size={14} />
+          <span>캘린더</span>
         </button>
       </nav>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* API Status Badge */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Backend Status Chip */}
         <button
           onClick={onOpenSettings}
-          title="백엔드 API 및 통신 설정"
+          title="백엔드 API 연결 설정 열기"
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '6px 12px',
-            borderRadius: '20px',
-            background: apiConfig.useMock ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-            border: `1px solid ${apiConfig.useMock ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
-            color: apiConfig.useMock ? '#fbbf24' : '#34d399',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            cursor: 'pointer'
+            gap: '6px',
+            padding: '5px 10px',
+            borderRadius: 'var(--radius-full)',
+            backgroundColor: apiConfig.useMock ? 'var(--accent-warning-subtle)' : 'var(--accent-success-subtle)',
+            border: `1px solid ${apiConfig.useMock ? 'rgba(245, 158, 11, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
+            color: apiConfig.useMock ? 'var(--accent-warning)' : 'var(--accent-success)',
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'var(--transition)',
           }}
         >
-          <Server size={14} />
-          <span>{apiConfig.useMock ? 'Mock API 모드' : 'Go Backend Live'}</span>
-          <Sliders size={13} style={{ marginLeft: '2px', opacity: 0.8 }} />
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: apiConfig.useMock ? 'var(--accent-warning)' : 'var(--accent-success)',
+            }}
+          />
+          <span>{apiConfig.useMock ? 'Mock API' : 'Go Backend Live'}</span>
+          <Sliders size={11} style={{ opacity: 0.7, marginLeft: '2px' }} />
         </button>
 
-        {/* Dark/Light Theme Switch */}
-        <button onClick={toggleTheme} className="btn-icon" title="테마 변경">
-          {theme === 'dark' ? <Sun size={20} color="#fbbf24" /> : <Moon size={20} color="#6366f1" />}
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="btn-icon"
+          title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          aria-label="테마 전환"
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        {/* User Auth */}
+        <div style={{ width: '1px', height: '16px', backgroundColor: 'var(--border-default)', margin: '0 4px' }} />
+
+        {/* User Auth Info */}
         {auth.isAuthenticated && auth.user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              background: 'rgba(99, 102, 241, 0.15)',
-              border: '1px solid rgba(99, 102, 241, 0.3)',
-              color: 'var(--text-primary)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-            }}>
-              <User size={15} color="var(--accent-primary)" />
-              <span>{auth.user.username}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '4px 8px 4px 4px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'var(--bg-subtle)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div
+                style={{
+                  width: '22px',
+                  height: '22px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--primary)',
+                  color: 'var(--text-on-accent)',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {auth.user.username.slice(0, 1).toUpperCase()}
+              </div>
+              <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {auth.user.username}
+              </span>
             </div>
-            <button onClick={onLogout} className="btn-icon" title="로그아웃">
-              <LogOut size={18} color="var(--accent-rose)" />
+            <button
+              onClick={onLogout}
+              className="btn-icon"
+              title="로그아웃"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <LogOut size={15} />
             </button>
           </div>
         ) : (
-          <button onClick={onOpenAuth} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-            <LogIn size={16} />
-            <span>JWT 로그인</span>
+          <button onClick={onOpenAuth} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+            <LogIn size={13} />
+            <span>로그인</span>
           </button>
         )}
       </div>

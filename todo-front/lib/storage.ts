@@ -49,7 +49,7 @@ const INITIAL_TODOS: Todo[] = [
 
 const DEFAULT_API_CONFIG: ApiConfig = {
   baseUrl: 'http://localhost:8080',
-  useMock: true, // Default to mock until user connects real backend
+  useMock: false, // Default to connecting directly to the Go Gin backend
   todosEndpoint: '/todos',
   authLoginEndpoint: '/auth/login',
   authRegisterEndpoint: '/auth/register',

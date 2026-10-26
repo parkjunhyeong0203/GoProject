@@ -1,7 +1,15 @@
 'use client';
 
-import React from 'react';
-import { CheckCircle2, Circle, Calendar, Edit3, Trash2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Check,
+  Calendar,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  AlertCircle,
+  Tag,
+} from 'lucide-react';
 import { Todo, Priority, Category } from '../lib/types';
 
 interface TodoCardProps {
@@ -11,29 +19,45 @@ interface TodoCardProps {
   onDelete: (id: string) => void;
 }
 
-const getPriorityBadge = (priority: Priority) => {
+const getPriorityConfig = (priority: Priority) => {
   switch (priority) {
     case 'urgent':
-      return { label: '긴급', bg: 'var(--priority-urgent-bg)', color: 'var(--priority-urgent-text)' };
+      return {
+        label: '긴급',
+        color: 'var(--accent-danger)',
+        bg: 'var(--accent-danger-subtle)',
+      };
     case 'high':
-      return { label: '높음', bg: 'var(--priority-high-bg)', color: 'var(--priority-high-text)' };
+      return {
+        label: '높음',
+        color: 'var(--accent-warning)',
+        bg: 'var(--accent-warning-subtle)',
+      };
     case 'medium':
-      return { label: '보통', bg: 'var(--priority-medium-bg)', color: 'var(--priority-medium-text)' };
+      return {
+        label: '보통',
+        color: 'var(--primary)',
+        bg: 'var(--primary-light)',
+      };
     case 'low':
-      return { label: '낮음', bg: 'var(--priority-low-bg)', color: 'var(--priority-low-text)' };
+      return {
+        label: '낮음',
+        color: 'var(--text-muted)',
+        bg: 'var(--bg-subtle)',
+      };
   }
 };
 
 const getCategoryLabel = (category: Category) => {
   const map: Record<Category, string> = {
-    work: '💼 업무',
-    personal: '👤 개인',
-    study: '📚 공부',
-    health: '💪 건강',
-    finance: '💰 금융',
-    other: '📌 기타',
+    work: '업무',
+    personal: '개인',
+    study: '공부',
+    health: '건강',
+    finance: '금융',
+    other: '기타',
   };
-  return map[category] || '📌 기타';
+  return map[category] || '기타';
 };
 
 export const TodoCard: React.FC<TodoCardProps> = ({
@@ -42,148 +66,196 @@ export const TodoCard: React.FC<TodoCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const priorityBadge = getPriorityBadge(todo.priority);
+  const [isHovered, setIsHovered] = useState(false);
+  const priorityConfig = getPriorityConfig(todo.priority);
 
-  // Check if overdue
-  const isOverdue = !todo.completed && todo.dueDate && new Date(todo.dueDate) < new Date(new Date().toDateString());
+  // Due Date calculation
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isOverdue = !todo.completed && todo.dueDate && todo.dueDate < todayStr;
+  const isToday = !todo.completed && todo.dueDate && todo.dueDate === todayStr;
 
   return (
     <div
-      className="glass-panel-interactive animate-fade-in"
+      className="card-hoverable animate-fade-in"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
-        padding: '16px 20px',
-        opacity: todo.completed ? 0.65 : 1,
-        borderLeft: todo.completed
-          ? '4px solid var(--text-muted)'
-          : `4px solid ${priorityBadge.color}`,
-        position: 'relative',
+        padding: '16px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
+        justifyContent: 'space-between',
+        minHeight: '140px',
+        opacity: todo.completed ? 0.6 : 1,
+        position: 'relative',
+        backgroundColor: todo.completed ? 'var(--bg-subtle)' : 'var(--bg-surface)',
       }}
     >
-      {/* Top Row: Checkbox, Title */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
-          <button
-            onClick={() => onToggleComplete(todo.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: todo.completed ? 'var(--accent-emerald)' : 'var(--text-muted)',
-              marginTop: '2px',
-              padding: 0,
-              transition: 'transform 0.15s ease',
-            }}
-          >
-            {todo.completed ? <CheckCircle2 size={22} color="var(--accent-emerald)" /> : <Circle size={22} />}
-          </button>
-
-          <div style={{ flex: 1 }}>
-            <h3
+      {/* Top Section: Checkbox, Title, and Action Controls */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1, minWidth: 0 }}>
+            {/* Custom Minimal Checkbox */}
+            <button
+              onClick={() => onToggleComplete(todo.id)}
+              aria-label={todo.completed ? '완료 취소' : '할 일 완료'}
               style={{
-                fontSize: '1.05rem',
-                fontWeight: 600,
-                textDecoration: todo.completed ? 'line-through' : 'none',
-                color: todo.completed ? 'var(--text-muted)' : 'var(--text-primary)',
-                marginBottom: '4px',
-                wordBreak: 'break-word',
+                width: '18px',
+                height: '18px',
+                borderRadius: 'var(--radius-xs)',
+                border: todo.completed
+                  ? '1.5px solid var(--accent-success)'
+                  : '1.5px solid var(--border-strong)',
+                backgroundColor: todo.completed ? 'var(--accent-success)' : 'transparent',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                marginTop: '2px',
+                padding: 0,
+                flexShrink: 0,
+                transition: 'var(--transition)',
               }}
             >
-              {todo.title}
-            </h3>
-            {todo.description && (
-              <p
+              {todo.completed && <Check size={12} strokeWidth={3} color="#ffffff" />}
+            </button>
+
+            {/* Title & Description */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3
                 style={{
-                  fontSize: '0.88rem',
-                  color: 'var(--text-secondary)',
+                  fontSize: '0.925rem',
+                  fontWeight: 600,
                   lineHeight: 1.4,
-                  whiteSpace: 'pre-wrap',
+                  color: todo.completed ? 'var(--text-muted)' : 'var(--text-primary)',
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  wordBreak: 'break-word',
                 }}
               >
-                {todo.description}
-              </p>
-            )}
+                {todo.title}
+              </h3>
+              {todo.description && (
+                <p
+                  style={{
+                    fontSize: '0.825rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.45,
+                    marginTop: '4px',
+                    wordBreak: 'break-word',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {todo.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Action Buttons (Edit & Delete) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '2px',
+              opacity: isHovered ? 1 : 0.4,
+              transition: 'opacity 0.15s ease',
+            }}
+          >
+            <button
+              onClick={() => onEdit(todo)}
+              className="btn-icon"
+              title="할 일 수정"
+              style={{ padding: '4px', color: 'var(--text-secondary)' }}
+            >
+              <Edit2 size={13} />
+            </button>
+            <button
+              onClick={() => onDelete(todo.id)}
+              className="btn-icon"
+              title="할 일 삭제"
+              style={{ padding: '4px', color: 'var(--text-muted)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-danger)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+            >
+              <Trash2 size={13} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Middle Meta Info: Priority, Category, Due Date, Overdue Notice */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', fontSize: '0.8rem' }}>
-        {/* Priority Badge */}
-        <span
-          style={{
-            padding: '3px 10px',
-            borderRadius: '12px',
-            background: priorityBadge.bg,
-            color: priorityBadge.color,
-            fontWeight: 600,
-          }}
-        >
-          {priorityBadge.label}
-        </span>
-
-        {/* Category Badge */}
-        <span
-          style={{
-            padding: '3px 10px',
-            borderRadius: '12px',
-            background: 'rgba(255, 255, 255, 0.06)',
-            color: 'var(--text-secondary)',
-            border: '1px solid var(--border-color)',
-          }}
-        >
-          {getCategoryLabel(todo.category)}
-        </span>
-
-        {/* Due Date */}
-        {todo.dueDate && (
+      {/* Bottom Metadata Section: Priority dot, Category, Due date */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: '14px',
+          paddingTop: '10px',
+          borderTop: '1px solid var(--border-subtle)',
+          fontSize: '0.75rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {/* Priority Tag with Dot */}
           <span
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
-              color: isOverdue ? 'var(--accent-rose)' : 'var(--text-secondary)',
-              fontWeight: isOverdue ? 600 : 400,
+              padding: '2px 7px',
+              borderRadius: 'var(--radius-xs)',
+              backgroundColor: priorityConfig.bg,
+              color: priorityConfig.color,
+              fontWeight: 500,
             }}
           >
-            {isOverdue ? <AlertCircle size={14} color="var(--accent-rose)" /> : <Calendar size={14} />}
-            <span>{todo.dueDate}</span>
+            <span
+              style={{
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                backgroundColor: priorityConfig.color,
+              }}
+            />
+            <span>{priorityConfig.label}</span>
           </span>
-        )}
-      </div>
 
-      {/* Bottom Action Row */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: '8px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          paddingTop: '8px',
-          marginTop: '4px',
-        }}
-      >
-        <button
-          onClick={() => onEdit(todo)}
-          className="btn-icon"
-          title="수정"
-          style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-        >
-          <Edit3 size={15} />
-          <span>수정</span>
-        </button>
-        <button
-          onClick={() => onDelete(todo.id)}
-          className="btn-icon"
-          title="삭제"
-          style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-rose)' }}
-        >
-          <Trash2 size={15} />
-          <span>삭제</span>
-        </button>
+          {/* Category Chip */}
+          <span
+            style={{
+              padding: '2px 7px',
+              borderRadius: 'var(--radius-xs)',
+              backgroundColor: 'var(--bg-subtle)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-secondary)',
+              fontWeight: 500,
+            }}
+          >
+            {getCategoryLabel(todo.category)}
+          </span>
+        </div>
+
+        {/* Due Date Indicator */}
+        {todo.dueDate && (
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: isOverdue
+                ? 'var(--accent-danger)'
+                : isToday
+                ? 'var(--accent-warning)'
+                : 'var(--text-muted)',
+              fontWeight: isOverdue || isToday ? 600 : 400,
+            }}
+          >
+            {isOverdue ? <AlertCircle size={12} /> : <Calendar size={12} />}
+            <span>{isToday ? '오늘 마감' : todo.dueDate}</span>
+          </div>
+        )}
       </div>
     </div>
   );
