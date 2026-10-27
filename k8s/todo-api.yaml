@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-api-deployment
+spec:
+  replicas: 1 # SQLite 특성상 1개 유지
+  selector:
+    matchLabels:
+      app: todo-api
+  template:
+    metadata:
+      labels:
+        app: todo-api
+    spec:
+      containers:
+        - name: todo-api-deployment
+          image: protdl-web-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: JWT_SECRET
+              value: "my-k8s-jwt-secret-key"
+            - name: DB_PATH
+              value: "/app/data/todo.db" # PVC 마운트 경로
+          volumeMounts:
+            - name: sqlite-storage
+              mountPath: /app/data
+      volumes:
+        - name: sqlite-storage
+          persistentVolumeClaim:
+            claimName: sqlite-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-api-service
+spec:
+  type: ClusterIP # 클러스터 내부용 서비스
+  selector:
+    app: todo-api
+  ports:
+    - port: 8080
+      targetPort: 8080

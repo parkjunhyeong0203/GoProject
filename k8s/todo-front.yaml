@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-front-deployment
+spec:
+  replicas: 2 # 프론트엔드는 스케일 아웃 가능
+  selector:
+    matchLabels:
+      app: todo-front
+  template:
+    metadata:
+      labels:
+        app: todo-front
+    spec:
+      containers:
+        - name: todo-front-deployment
+          image: protdl-web-front:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-front-service
+spec:
+  type: NodePort # 외부 접속 가능하도록 설정
+  selector:
+    app: todo-front
+  ports:
+    - port: 80
+      targetPort: 3000
+      nodePort: 30080 # 로컬 브라우저에서 접근할 포트
